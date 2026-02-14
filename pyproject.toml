@@ -1,0 +1,148 @@
+[build-system]
+requires = ["setuptools>=68.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neo4j-orchestration-framework"
+version = "0.1.0"
+description = "Orchestration framework for Neo4j-based knowledge graphs with LLM integration"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Gokul Tripurneni", email = "gokultripurneni@gmail.com"}
+]
+keywords = ["neo4j", "knowledge-graph", "llm", "orchestration", "memory-systems"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+# Core dependencies - required for basic functionality
+dependencies = [
+    "neo4j>=5.0.0,<6.0.0",
+    "pydantic>=2.0.0,<3.0.0",
+    "pyyaml>=6.0",
+    "python-dateutil>=2.8.0",
+]
+
+[project.optional-dependencies]
+# Optional: Distributed memory with Redis
+redis = [
+    "redis>=5.0.0",
+    "hiredis>=2.0.0",
+]
+
+# Optional: Embeddings for semantic memory
+embeddings = [
+    "sentence-transformers>=2.0.0",
+    "torch>=2.0.0",
+]
+
+# Optional: All optional dependencies
+all = [
+    "neo4j-orchestration-framework[redis]",
+    "neo4j-orchestration-framework[embeddings]",
+]
+
+# Development dependencies
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+    "pre-commit>=3.4.0",
+]
+
+# Documentation dependencies
+docs = [
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.0.0",
+    "mkdocstrings[python]>=0.23.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/neo4j-orchestration-framework"
+Documentation = "https://neo4j-orchestration-framework.readthedocs.io"
+Repository = "https://github.com/yourusername/neo4j-orchestration-framework"
+Issues = "https://github.com/yourusername/neo4j-orchestration-framework/issues"
+
+# Setuptools configuration
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# Black formatter configuration
+[tool.black]
+line-length = 88
+target-version = ["py310", "py311", "py312"]
+include = '\.pyi?$'
+
+# Ruff linter configuration
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+select = [
+    "E",
+    "W",
+    "F",
+    "I",
+    "B",
+    "C4",
+    "UP",
+]
+ignore = [
+    "E501",
+    "B008",
+]
+
+# MyPy type checker configuration
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_generics = false
+disallow_subclassing_any = false
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+
+# Pytest configuration
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--cov=neo4j_orchestration",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+markers = [
+    "unit: Unit tests (fast, no external dependencies)",
+    "integration: Integration tests (requires test Neo4j)",
+    "e2e: End-to-end tests (full workflows)",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["src"]
+omit = ["*/tests/*", "*/test_*.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
