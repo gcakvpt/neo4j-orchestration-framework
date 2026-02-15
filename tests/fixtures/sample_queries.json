@@ -1,0 +1,26 @@
+{
+  "vendor_risk_queries": [
+    "What are the high-risk vendors?",
+    "Show me vendors with control gaps",
+    "Find vendors missing required controls",
+    "Which Tier 1 vendors have critical risks?"
+  ],
+  "compliance_queries": [
+    "Which vendors are non-compliant with BSA/AML?",
+    "Show me Fair Lending violations",
+    "List controls required by FCRA",
+    "What vendors have OCC regulation gaps?"
+  ],
+  "control_queries": [
+    "What controls does VEN001 have?",
+    "Show control effectiveness by vendor tier",
+    "Find ineffective controls below 70%",
+    "Which controls mitigate operational risk?"
+  ],
+  "relationship_queries": [
+    "Show me the control blast radius for CTRL001",
+    "What risks are unmitigated?",
+    "Find fourth-party vendor dependencies",
+    "Which controls depend on other controls?"
+  ]
+}
