@@ -7,7 +7,7 @@ name = "neo4j-orchestration-framework"
 version = "0.1.0"
 description = "Orchestration framework for Neo4j-based knowledge graphs with LLM integration"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
     {name = "Gokul Tripurneni", email = "gokultripurneni@gmail.com"}
