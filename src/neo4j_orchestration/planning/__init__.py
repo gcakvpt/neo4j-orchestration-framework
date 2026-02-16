@@ -1,35 +1,35 @@
 """
 Query Planning Module
 
-This module provides components for analyzing, planning, and executing
-natural language queries against the Enterprise Risk Knowledge Graph.
-
-Components:
-    - QueryIntent: Data classes for representing query intent
-    - QueryIntentClassifier: Classify natural language queries
-    - CypherGenerator: Generate Cypher queries from intent
-    - QueryOptimizer: Optimize query execution plans
-    - ExecutionPipeline: Execute queries and process results
+Provides query intent classification and Cypher query generation.
 """
 
-from neo4j_orchestration.planning.intent import (
+from .intent import (
     QueryType,
-    QueryIntent,
     EntityType,
-    FilterCondition,
-    FilterOperator,
-    Aggregation,
     AggregationType,
+    FilterOperator,
+    FilterCondition,
+    Aggregation,
+    QueryIntent,
 )
-from neo4j_orchestration.planning.classifier import QueryIntentClassifier
+
+from .classifier import QueryIntentClassifier
+
+from .generator import CypherQueryGenerator, generate_cypher
 
 __all__ = [
+    # Intent types
     "QueryType",
-    "QueryIntent",
     "EntityType",
-    "FilterCondition",
-    "FilterOperator",
-    "Aggregation",
     "AggregationType",
+    "FilterOperator",
+    "FilterCondition",
+    "Aggregation",
+    "QueryIntent",
+    # Classifier
     "QueryIntentClassifier",
+    # Generator
+    "CypherQueryGenerator",
+    "generate_cypher",
 ]
