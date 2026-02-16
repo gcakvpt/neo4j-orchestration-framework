@@ -240,10 +240,17 @@ class QueryIntentClassifier:
         return {
             QueryType.VENDOR_RISK: [
                 (r'\b(vendor|supplier)s?\s+(with|having)\s+(critical|high|medium|low)?\s*risk', 0.95),
+                (r'\b(which|what)\s+(vendor|supplier)s?\s+(have|with)\s+(high|critical|medium|low)\s+\w+\s+risk', 0.95),
+                (r'\btop\s+\d+\s+(vendor|supplier)s?', 0.95),
+                (r'\b(vendor|supplier)s?\s+(by|with)\s+risk\s+(level|rating)', 0.9),
+                (r'\btop\s+\d+\s+(vendor|supplier)s?\s+(by\s+)?risk', 0.95),
                 (r'\brisk\w*\s+(vendor|supplier)', 0.9),
                 (r'\b(vendor|supplier)\s+risk', 0.9),
             ],
             QueryType.VENDOR_LIST: [
+                (r'\b(count|how many)\s+(all\s+)?(vendor|supplier)s?', 0.9),
+                (r'\b(list|show|display|get)\s+(active|inactive|pending)\s+(vendor|supplier)s?', 0.9),
+                (r'\b(all|show)\s+(vendor|supplier)s?', 0.85),
                 (r'\b(list|show|display|get)\s+(all\s+)?(vendor|supplier)s?', 0.9),
                 (r'\b(vendor|supplier)s?\s+(list|directory)', 0.85),
             ],
@@ -265,6 +272,8 @@ class QueryIntentClassifier:
             ],
             QueryType.REGULATION_DETAILS: [
                 (r'\bregulation\s+(details?|information)', 0.95),
+                (r'\b(what|which)\s+regulations?\s+(apply|relate)', 0.9),
+                (r'\bregulations?\s+(for|applying to|about)', 0.85),
                 (r'\b(bsa|aml|fcra|ecoa)\s+(requirement|rule)', 0.9),
             ],
             QueryType.COMPLIANCE_GAPS: [
