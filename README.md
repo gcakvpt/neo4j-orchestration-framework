@@ -1,4 +1,4 @@
-# Neo4j Orchestration Framework
+# Neo3j Orchestration Framework
 
 [![Tests](https://img.shields.io/badge/tests-47%20passing-brightgreen)]()
 [![Coverage](https://img.shields.io/badge/coverage-65--93%25-green)]()
