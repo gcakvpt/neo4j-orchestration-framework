@@ -1,0 +1,17 @@
+# Neo4j Orchestration Framework Requirements
+
+# Core dependencies
+neo4j>=5.0.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# Development dependencies
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+ruff>=0.1.0
+mypy>=1.5.0
+
+# Optional: For extended functionality
+anthropic>=0.7.0

@@ -1,28 +1,113 @@
 # Neo4j Orchestration Framework
 
-A production-ready orchestration layer for Neo4j graph databases with integrated memory systems, intelligent query planning, and workflow automation.
+[![Tests](https://img.shields.io/badge/tests-47%20passing-brightgreen)]()
+[![Coverage](https://img.shields.io/badge/coverage-65--93%25-green)]()
+[![Python](https://img.shields.io/badge/python-3.9+-blue)]()
 
-## Overview
+A production-ready orchestration layer for Neo4j graph databases with **natural language query support**, integrated memory systems, and intelligent query planning.
 
-The Neo4j Orchestration Framework provides a sophisticated abstraction layer over Neo4j, designed for enterprise applications requiring:
+## 🚀 Quick Start (1 minute)
+```python
+from neo4j_orchestration.planning import QueryIntentClassifier, CypherQueryGenerator
+from neo4j_orchestration.execution import QueryExecutor, Neo4jConfig
 
-- **Three-tier memory architecture** (Working, Episodic, Semantic)
-- **Intelligent query planning** with intent recognition
-- **Graph analytics coordination** using Neo4j GDS
-- **Context-aware business logic** integration
-- **Automated workflow execution** with retry logic
+# Setup
+config = Neo4jConfig(uri="bolt://localhost:7687", username="neo4j", password="password")
+classifier = QueryIntentClassifier()
+generator = CypherQueryGenerator()
+executor = QueryExecutor(config)
 
-## Architecture
+# Natural language to results in 3 lines
+intent = classifier.classify("Show critical risk vendors")
+query, params = generator.generate(intent)
+results = executor.execute(query, params)
+
+print(f"Found {len(results)} vendors")
+```
+
+**See it in action:** `python demos/quick_start.py`
+
+## ✨ What's New: Week 3 - Natural Language Pipeline
+
+The framework now supports **natural language queries** that are automatically converted to safe, parameterized Cypher queries:
+```python
+# Instead of writing Cypher...
+"MATCH (v:Vendor) WHERE v.riskLevel = 'Critical' AND v.tier = '1' RETURN v"
+
+# Just say what you want:
+"Show critical risk tier 1 vendors"
+```
+
+**Complete Pipeline:**
+```
+Natural Language
+    ↓ QueryIntentClassifier (pattern-based NL understanding)
+QueryIntent (structured representation)
+    ↓ CypherQueryGenerator (template-based generation)
+Cypher Query + Parameters (safe, parameterized)
+    ↓ QueryExecutor (connection management, execution)
+Python Results (List[Dict])
+```
+
+## 📦 Features
+
+### Natural Language Querying (Week 3)
+- **QueryIntentClassifier**: Convert natural language to structured intents
+- **CypherQueryGenerator**: Generate safe, parameterized Cypher queries
+- **QueryExecutor**: Execute queries and convert results to Python objects
+
+### Memory Systems (Week 2)
+- **Working Memory**: Short-term context with TTL expiration
+- **Episodic Memory**: Temporal event storage and retrieval
+- **Semantic Memory**: Long-term knowledge and pattern storage
+
+### Core Infrastructure (Week 1)
+- Type-safe operations with Pydantic
+- Comprehensive error handling
+- Performance logging
+- 47 tests (100% passing)
+
+## 🎯 Supported Query Types
+
+### Entity Queries
+```python
+"Show all vendors"
+"List tier 1 vendors"
+"Find critical risk controls"
+```
+
+### Filtered Queries
+```python
+"Show critical risk vendors"
+"Find active tier 1 vendors"
+"List vendors in tier 1 or tier 2"
+```
+
+### Aggregations
+```python
+"Count all vendors"
+"How many critical controls?"
+"Average risk score by tier"
+```
+
+### Relationships
+```python
+"Show vendor relationships"
+"Find fourth party vendors"
+"List vendor control implementations"
+```
+
+## 📊 Architecture
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    Client Application                        │
 └────────────────────┬────────────────────────────────────────┘
                      │
 ┌────────────────────▼────────────────────────────────────────┐
-│              Workflow Engine (Orchestrator)                  │
+│              Natural Language Pipeline                       │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │   Context    │  │    Query     │  │  Analytics   │      │
-│  │   Manager    │  │   Planner    │  │ Coordinator  │      │
+│  │ NL Classifier│→ │    Query     │→ │   Query      │      │
+│  │              │  │  Generator   │  │  Executor    │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
 └────────────────────┬────────────────────────────────────────┘
                      │
@@ -40,141 +125,89 @@ The Neo4j Orchestration Framework provides a sophisticated abstraction layer ove
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Installation
+## 🔧 Installation
 
 ### From Source
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/neo4j-orchestration-framework.git
+git clone https://github.com/gcakvpt/neo4j-orchestration-framework.git
 cd neo4j-orchestration-framework
-
-# Install with core dependencies
 pip install -e .
-
-# Install with optional dependencies
-pip install -e ".[redis,embeddings]"
-
-# Install with development dependencies
-pip install -e ".[dev]"
 ```
 
-## Quick Start
-```python
-from neo4j_orchestration import OrchestrationFramework
+### Requirements
+- Python 3.9+
+- Neo4j 5.0+ (optional for demos - they use mocks)
 
-# Initialize framework
-framework = OrchestrationFramework(
-    neo4j_uri="bolt://localhost:7687",
-    neo4j_user="neo4j",
-    neo4j_password="password"
-)
+## 🎮 Demos
+```bash
+# Quick start (1 minute)
+python demos/quick_start.py
 
-# Execute a workflow
-result = framework.execute_workflow(
-    workflow_name="vendor_risk_assessment",
-    entity_id="VEN001"
-)
-
-print(f"Risk Score: {result.results['risk_score']}")
+# Complete pipeline demo (5 minutes)
+python demos/week3_complete_pipeline.py
 ```
 
-## Features
+See [demos/README.md](demos/README.md) for more examples.
 
-### Memory Systems
-
-- **Working Memory**: Fast cache for active session data (TTL: minutes-hours)
-- **Episodic Memory**: Session-based analysis history (immutable)
-- **Semantic Memory**: Business rules and learned patterns (versioned)
-
-### Query Planning
-
-Automatically classifies query intent and generates optimal execution plans:
-
-- Entity lookups
-- Relationship traversals
-- Pattern matching
-- Aggregations
-- Analytics workflows
-
-### Analytics Integration
-
-Seamless integration with Neo4j Graph Data Science:
-
-- PageRank for importance scoring
-- Betweenness Centrality for bottleneck detection
-- Community Detection (Louvain, WCC)
-- Path algorithms
-- Node similarity
-
-### Workflow Automation
-
-Define complex multi-step workflows with:
-
-- Automatic retry logic
-- Step dependencies
-- Context preservation
-- Error handling
-
-## Development
-
-### Running Tests
+## 🧪 Testing
 ```bash
 # Run all tests
 pytest
 
-# Run with coverage
-pytest --cov=src/neo4j_orchestration --cov-report=html
+# With coverage
+pytest --cov=src --cov-report=html
 
-# Run specific test types
-pytest -m unit
-pytest -m integration
-pytest -m e2e
+# Specific module
+pytest tests/unit/planning/
 ```
 
-### Code Quality
-```bash
-# Format code
-black src/ tests/
+**Current Status:** 47/47 tests passing (100%)
 
-# Lint code
-ruff check src/ tests/
+## 📚 Documentation
 
-# Type checking
-mypy src/
-```
+- [Quick Start Guide](docs/QUICK_START.md)
+- [Week 3 Completion Report](docs/WEEK3_COMPLETION_REPORT.md)
+- [Architecture Overview](docs/)
+- [API Reference](docs/api_reference/)
 
-## Project Status
+## 🗺️ Roadmap
 
-**Current Version**: 0.1.0 (Week 1 - Foundation)
+### Week 4 (Upcoming): Memory Integration
+- [ ] Query history tracking
+- [ ] Pattern learning from user queries
+- [ ] Context-aware query refinement
+- [ ] Memory-augmented generation
 
-### Completed
-- ✅ Core type definitions
-- ✅ Exception hierarchy
-- ✅ Utility modules (logging, validation, Cypher)
-- ✅ Unit tests
-- ✅ Project structure
+### Future Enhancements
+- [ ] Query result caching
+- [ ] Batch query execution
+- [ ] Advanced relationship patterns
+- [ ] Custom aggregation functions
+- [ ] GraphQL interface
 
-### In Progress
-- 🚧 Memory systems implementation
-- 🚧 Query planning engine
-- 🚧 Analytics coordinator
+## 🤝 Contributing
 
-### Planned
-- 📋 Context manager
-- 📋 Workflow engine
-- 📋 Integration tests
-- 📋 Documentation
+Contributions welcome! This is an active development project.
 
-## License
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Ensure all tests pass
+5. Submit a pull request
 
-MIT License - see LICENSE file for details
+## 📄 License
 
-## Contributing
+MIT License - See LICENSE file for details
 
-Contributions welcome! Please read CONTRIBUTING.md for guidelines.
+## 🙏 Acknowledgments
 
-## Author
+Built with:
+- [Neo4j Python Driver](https://github.com/neo4j/neo4j-python-driver)
+- [Pydantic](https://github.com/pydantic/pydantic)
+- [pytest](https://github.com/pytest-dev/pytest)
 
-Gokul Tripurneni (gokultripurneni@gmail.com)
-xE
+---
 
+**Status:** Week 3 Complete ✅ | Natural Language Pipeline Production-Ready
+
+For questions or feedback, please open an issue on GitHub.
