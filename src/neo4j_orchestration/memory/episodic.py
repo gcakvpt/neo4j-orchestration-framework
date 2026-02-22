@@ -520,3 +520,116 @@ class EpisodicMemory(BaseMemory):
                 f"Failed to get session chain: {session_id}",
                 details={"session_id": session_id, "error": str(e)}
             ) from e
+
+
+# ============================================================================
+# Simple Event class for Query History (Week 4)
+# This is separate from the Neo4j-backed EpisodicMemory above
+# ============================================================================
+
+class Event:
+    """Simple in-memory event for query history tracking.
+    
+    This is a lightweight event structure used by QueryHistory
+    to track query executions without requiring Neo4j.
+    
+    Attributes:
+        event_id: Unique event identifier
+        event_type: Type of event (e.g., "query_executed")
+        content: Event data/payload
+        timestamp: When the event occurred
+    """
+    
+    def __init__(
+        self,
+        event_id: str,
+        event_type: str,
+        content: Dict[str, Any],
+        timestamp: Optional[datetime] = None,
+    ):
+        """Initialize event.
+        
+        Args:
+            event_id: Unique identifier
+            event_type: Event type classification
+            content: Event data
+            timestamp: Event timestamp (defaults to now)
+        """
+        self.event_id = event_id
+        self.event_type = event_type
+        self.content = content
+        self.timestamp = timestamp or datetime.now()
+
+
+class SimpleEpisodicMemory:
+    """Simple in-memory episodic storage for query history.
+    
+    This is a simplified version used by QueryHistory that doesn't
+    require Neo4j. For full episodic memory features, use EpisodicMemory.
+    """
+    
+    def __init__(self):
+        """Initialize simple episodic memory."""
+        self.memory_store: Dict[str, Event] = {}
+    
+    def store(self, event: Event) -> None:
+        """Store an event.
+        
+        Args:
+            event: Event to store
+        """
+        self.memory_store[event.event_id] = event
+    
+    def retrieve_recent(
+        self,
+        event_type: Optional[str] = None,
+        limit: int = 10
+    ) -> List[Event]:
+        """Retrieve recent events.
+        
+        Args:
+            event_type: Filter by event type
+            limit: Maximum number of events
+            
+        Returns:
+            List of events, most recent first
+        """
+        events = list(self.memory_store.values())
+        
+        # Filter by type if specified
+        if event_type:
+            events = [e for e in events if e.event_type == event_type]
+        
+        # Sort by timestamp, most recent first
+        events.sort(key=lambda e: e.timestamp, reverse=True)
+        
+        return events[:limit]
+
+
+# ============================================================================
+# ⚠️ TECHNICAL DEBT - Week 4 Session 1 Quick Fix ⚠️
+# ============================================================================
+# TODO: REMOVE SimpleEpisodicMemory and Event classes after async refactor
+# 
+# These classes were added as a temporary workaround in Week 4 Session 1 to
+# avoid async complexity. They provide in-memory query history storage but
+# DO NOT persist to Neo4j.
+# 
+# WHY THIS IS TEMPORARY:
+# - Query history is lost on application restart (in-memory only)
+# - Duplicates functionality that should use EpisodicMemory (above)
+# - Architecture inconsistency - Week 2 is async, Week 4 is sync
+#
+# REFACTOR PLAN:
+# 1. Make QueryOrchestrator async (orchestrator.py)
+# 2. Update QueryHistory to use real EpisodicMemory.save_session()
+# 3. Delete Event and SimpleEpisodicMemory classes (lines below)
+# 4. Update all tests to async
+# 5. Add integration test proving Neo4j persistence
+#
+# TRACKING:
+# - See TODO.md (item #1)
+# - Created: 2025-02-22
+# - Target: End of Week 4 or Week 5 kickoff
+# - Priority: HIGH (must fix before production)
+# ============================================================================
