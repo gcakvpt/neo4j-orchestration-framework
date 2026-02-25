@@ -101,9 +101,9 @@ class QueryPatternMemory(BaseMemory):
         RETURN p.pattern_id as pattern_id
         """
         
-        async with self.driver.session() as session:
+        with self.driver.session() as session:
             try:
-                result = await session.run(
+                result = session.run(
                     query,
                     pattern_sig=pattern_sig,
                     query_type=query_type.value,
@@ -123,8 +123,8 @@ class QueryPatternMemory(BaseMemory):
         RETURN p
         """
         
-        async with self.driver.session() as session:
-            result = await session.run(query, pattern_id=pattern_id)
+        with self.driver.session() as session:
+            result = session.run(query, pattern_id=pattern_id)
             record = await result.single()
             
             if not record:
@@ -164,8 +164,8 @@ class QueryPatternMemory(BaseMemory):
         RETURN count(p) as deleted
         """
         
-        async with self.driver.session() as session:
-            result = await session.run(query, pattern_id=key)
+        with self.driver.session() as session:
+            result = session.run(query, pattern_id=key)
             record = await result.single()
             return record["deleted"] > 0 if record else False
     
@@ -177,13 +177,50 @@ class QueryPatternMemory(BaseMemory):
     async def clear(self) -> None:
         """Clear all query patterns."""
         query = "MATCH (p:QueryPattern) DELETE p"
-        async with self.driver.session() as session:
+        with self.driver.session() as session:
             await session.run(query)
     
     async def list_keys(self, pattern: Optional[str] = None) -> List[str]:
         """List all pattern IDs."""
         query = "MATCH (p:QueryPattern) RETURN p.pattern_id as pattern_id"
         
-        async with self.driver.session() as session:
-            result = await session.run(query)
+        with self.driver.session() as session:
+            result = session.run(query)
             return [record["pattern_id"] async for record in result]
+
+    async def get_common_filters(
+        self,
+        query_type: QueryType,
+        min_frequency: int = 2
+    ) -> Dict[str, Any]:
+        """
+        Get common filters for a query type.
+        
+        Args:
+            query_type: Type of query
+            min_frequency: Minimum frequency threshold
+            
+        Returns:
+            Dictionary of common filters
+        """
+        query = """
+        MATCH (p:QueryPattern)
+        WHERE p.query_type = $query_type
+        AND p.frequency >= $min_frequency
+        RETURN p.common_filters as filters
+        ORDER BY p.frequency DESC
+        LIMIT 1
+        """
+        
+        try:
+            # Use sync session since driver is sync
+            with self.driver.session() as session:
+                result = session.run(
+                    query,
+                    query_type=query_type.value,
+                    min_frequency=min_frequency
+                )
+                record = result.single()
+                return record["filters"] if record else {}
+        except Exception as e:
+            raise MemoryError(f"Failed to get common filters: {e}") from e
