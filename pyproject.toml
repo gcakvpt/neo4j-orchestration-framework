@@ -12,6 +12,7 @@ license = {text = "MIT"}
 authors = [
     {name = "Gokul Tripurneni", email = "gokultripurneni@gmail.com"}
 ]
+
 keywords = ["neo4j", "knowledge-graph", "llm", "orchestration", "memory-systems"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -130,6 +131,7 @@ markers = [
     "unit: Unit tests (fast, no external dependencies)",
     "integration: Integration tests (requires test Neo4j)",
     "e2e: End-to-end tests (full workflows)",
+    "performance: Performance benchmark tests",
 ]
 
 # Coverage configuration
@@ -146,3 +148,4 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
 ]
+
