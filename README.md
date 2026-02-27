@@ -1,8 +1,9 @@
 # Neo4j Orchestration Framework
 
-[![Tests](https://img.shields.io/badge/tests-47%20passing-brightgreen)]()
-[![Coverage](https://img.shields.io/badge/coverage-65--93%25-green)]()
+[![Tests](https://img.shields.io/badge/tests-83%20passing-brightgreen)]()
+[![Coverage](https://img.shields.io/badge/coverage-56%25-green)]()
 [![Python](https://img.shields.io/badge/python-3.9+-blue)]()
+[![License](https://img.shields.io/badge/license-MIT-blue)]()
 
 A production-ready orchestration layer for Neo4j graph databases with **natural language query support**, integrated memory systems, and intelligent query planning.
 
@@ -27,9 +28,38 @@ print(f"Found {len(results)} vendors")
 
 **See it in action:** `python demos/quick_start.py`
 
-## ✨ What's New: Week 3 - Natural Language Pipeline
+## ✨ What's New: Week 4 - Pattern Learning System
 
-The framework now supports **natural language queries** that are automatically converted to safe, parameterized Cypher queries:
+The framework now includes **intelligent pattern learning** that makes queries smarter over time:
+
+```python
+# The system learns from your query patterns
+"Show critical risk tier 1 vendors"  # First time
+"Show critical risk tier 1 vendors"  # Second time - faster, pattern recognized
+"Show critical risk tier 1 vendors"  # Third time - enhanced with learned filters
+
+# Pattern memory tracks:
+# - Query frequency and common patterns
+# - Entity-specific preferences
+# - Cross-session persistence
+# - <50ms performance overhead
+```
+
+**Complete Pattern Learning Pipeline:**
+```
+User Query
+    ↓ QueryPatternMemory (frequency tracking)
+Pattern Recognition (common filters extracted)
+    ↓ UserPreferenceMemory (entity-specific learning)
+Enhanced Query Intent (learned optimizations applied)
+    ↓ CypherQueryGenerator (optimized query generation)
+Results + Pattern Update (continuous learning)
+```
+
+## ✨ Week 3: Natural Language Pipeline
+
+The framework supports **natural language queries** that are automatically converted to safe, parameterized Cypher queries:
+
 ```python
 # Instead of writing Cypher...
 "MATCH (v:Vendor) WHERE v.riskLevel = 'Critical' AND v.tier = '1' RETURN v"
@@ -51,6 +81,13 @@ Python Results (List[Dict])
 
 ## 📦 Features
 
+### Pattern Learning (Week 4)
+- **QueryPatternMemory**: Learns from query execution patterns
+- **UserPreferenceMemory**: Entity-specific preference tracking
+- **Pattern Convergence**: Queries improve with repetition
+- **Multi-entity Isolation**: Separate patterns per entity type
+- **Performance**: <50ms overhead per query
+
 ### Natural Language Querying (Week 3)
 - **QueryIntentClassifier**: Convert natural language to structured intents
 - **CypherQueryGenerator**: Generate safe, parameterized Cypher queries
@@ -65,7 +102,7 @@ Python Results (List[Dict])
 - Type-safe operations with Pydantic
 - Comprehensive error handling
 - Performance logging
-- 47 tests (100% passing)
+- 83 tests (100% passing)
 
 ## 🎯 Supported Query Types
 
@@ -109,6 +146,15 @@ Python Results (List[Dict])
 │  │ NL Classifier│→ │    Query     │→ │   Query      │      │
 │  │              │  │  Generator   │  │  Executor    │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────┐
+│                 Pattern Learning Layer                       │
+│  ┌──────────────┐  ┌──────────────┐                         │
+│  │   Query      │  │     User     │                         │
+│  │   Pattern    │  │  Preference  │                         │
+│  │   Memory     │  │    Memory    │                         │
+│  └──────────────┘  └──────────────┘                         │
 └────────────────────┬────────────────────────────────────────┘
                      │
 ┌────────────────────▼────────────────────────────────────────┐
@@ -159,26 +205,57 @@ pytest --cov=src --cov-report=html
 
 # Specific module
 pytest tests/unit/planning/
+
+# Integration tests (requires Neo4j)
+pytest tests/integration/
 ```
 
-**Current Status:** 47/47 tests passing (100%)
+**Current Status:** 83/83 unit tests passing (100%)  
+**Integration Tests:** 8 tests (require Neo4j instance)  
+**Coverage:** 56% overall
 
 ## 📚 Documentation
 
 - [Quick Start Guide](docs/QUICK_START.md)
+- [Architecture Overview](docs/ARCHITECTURE.md)
 - [Week 3 Completion Report](docs/WEEK3_COMPLETION_REPORT.md)
-- [Architecture Overview](docs/)
+- [Week 4 Session 3 Summary](WEEK4_SESSION3_SUMMARY.md)
 - [API Reference](docs/api_reference/)
+
+## 📰 Blog Series
+
+This framework is documented in a 5-part technical series on Substack:
+
+1. **Why AI Needs Procedural Memory** - The foundational problem
+2. **Building the Enterprise Risk Knowledge Graph** - The data layer
+3. **The Orchestration Framework** - The intelligence layer architecture
+4. **Coming Soon:** Pattern Learning & Confidence Evaluation
+5. **Coming Soon:** Production Deployment at Scale
+
+📖 Read the series at [gtripur.substack.com](https://gtripur.substack.com)
 
 ## 🗺️ Roadmap
 
-### Week 4 (Upcoming): Memory Integration
-- [ ] Query history tracking
-- [ ] Pattern learning from user queries
-- [ ] Context-aware query refinement
-- [ ] Memory-augmented generation
+### Week 4 (Complete ✅): Pattern Learning
+- [x] QueryPatternMemory implementation
+- [x] UserPreferenceMemory integration
+- [x] Pattern convergence mechanics
+- [x] Multi-entity isolation
+- [x] Cross-session persistence
+- [x] 8 comprehensive integration tests
+- [x] <50ms performance overhead validation
 
-### Future Enhancements
+### Week 5 (In Progress): QueryType Refactoring
+- [ ] Generic operation types (LIST, FILTER, DETAILS, AGGREGATE)
+- [ ] Entity-agnostic query handling
+- [ ] Backward compatibility layer
+- [ ] 150+ test migrations
+
+### Future Enhancements (v0.4-v1.0)
+- [ ] Confidence evaluation system
+- [ ] Progressive context loading
+- [ ] AnalysisSession tracking (procedural memory)
+- [ ] Rolling checkpoints (multi-session continuity)
 - [ ] Query result caching
 - [ ] Batch query execution
 - [ ] Advanced relationship patterns
@@ -197,7 +274,7 @@ Contributions welcome! This is an active development project.
 
 ## 📄 License
 
-MIT License - See LICENSE file for details
+MIT License - See [LICENSE](LICENSE) file for details
 
 ## 🙏 Acknowledgments
 
@@ -206,8 +283,13 @@ Built with:
 - [Pydantic](https://github.com/pydantic/pydantic)
 - [pytest](https://github.com/pytest-dev/pytest)
 
+Inspired by:
+- [Sanjay Kotagiri's work on Systems of Intelligence](https://lnkd.in/d8MiNZj4)
+- Cognitive science research on human memory systems
+- Enterprise risk management best practices
+
 ---
 
-**Status:** Week 3 Complete ✅ | Natural Language Pipeline Production-Ready
+**Status:** Week 4 Complete ✅ | Pattern Learning System Integration-Ready
 
-For questions or feedback, please open an issue on GitHub.
+For questions or feedback, please open an issue on GitHub or subscribe to the [blog series](https://gtripur.substack.com).
