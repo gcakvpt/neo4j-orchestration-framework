@@ -29,10 +29,10 @@ Transform domain-specific QueryType enum into generic operations to enable:
 - [x] Compositional query building works for all types
 - [x] All 35 generator tests passing (20 + 15 coverage + 5 new)
 
-### Phase 4: Memory/Pattern System (30 min)
-- [ ] Update QueryPatternMemory
-- [ ] Update UserPreferenceTracker
-- [ ] Update pattern learning tests (13 tests)
+### Phase 4: Memory/Pattern System (30 min) ✅
+- [x] QueryPatternMemory now stores by generic type
+- [x] UserPreferenceTracker uses generic types (via delegation)
+- [x] Integration tests updated to use QueryType.LIST
 
 ### Phase 5: Context System (30 min)
 - [ ] Update ContextAwareClassifier

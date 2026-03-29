@@ -17,7 +17,7 @@ IMPACT: Pattern learning cannot work with arbitrary entities in the knowledge gr
 SOLUTION: Refactor QueryType to generic operations (LIST, FILTER, DETAILS, etc.)
           See: QUERYTYPE_REFACTOR_ANALYSIS.md for full plan
 
-TEMPORARY WORKAROUND: Tests use QueryType.VENDOR_LIST as placeholder.
+NOTE: Tests now use generic QueryType.LIST - pattern learning is entity-agnostic!
                      This validates pattern learning mechanics but not scalability.
 
 REFACTORING SCHEDULED: Week 5, Session 1 (~4 hours)
@@ -106,7 +106,7 @@ class TestPatternLearningIntegration:
         
         # Create intent with critical filter
         critical_intent = QueryIntent(
-            query_type=QueryType.VENDOR_LIST,
+            query_type=QueryType.LIST,
             entities=[EntityType.VENDOR],
             filters=[
                 FilterCondition(
@@ -134,7 +134,7 @@ class TestPatternLearningIntegration:
             await tracker.record_query_preference(critical_intent, result, True)
         
         # Verify pattern was learned
-        filters = await tracker.get_preferred_filters(QueryType.VENDOR_LIST, min_frequency=2)
+        filters = await tracker.get_preferred_filters(QueryType.LIST, min_frequency=2)
         assert "criticality" in filters
         assert filters["criticality"] == "Critical"
         
@@ -153,7 +153,7 @@ class TestPatternLearningIntegration:
         
         # Record vendor patterns
         vendor_intent = QueryIntent(
-            query_type=QueryType.VENDOR_LIST,
+            query_type=QueryType.LIST,
             entities=[EntityType.VENDOR],
             filters=[
                 FilterCondition(
@@ -180,7 +180,7 @@ class TestPatternLearningIntegration:
         
         # Record control patterns with different filter
         control_intent = QueryIntent(
-            query_type=QueryType.VENDOR_LIST,
+            query_type=QueryType.LIST,
             entities=[EntityType.CONTROL],
             filters=[
                 FilterCondition(
@@ -207,7 +207,7 @@ class TestPatternLearningIntegration:
         
         # Create new intent for vendor (without filters)
         new_vendor_intent = QueryIntent(
-            query_type=QueryType.VENDOR_LIST,
+            query_type=QueryType.LIST,
             entities=[EntityType.VENDOR],
             filters=[],
         )
@@ -233,7 +233,7 @@ class TestPatternLearningIntegration:
         
         # Record a pattern
         intent = QueryIntent(
-            query_type=QueryType.VENDOR_LIST,
+            query_type=QueryType.LIST,
             entities=[EntityType.VENDOR],
             filters=[
                 FilterCondition(
@@ -271,7 +271,7 @@ class TestPatternLearningIntegration:
         
         # Get patterns from Neo4j (not from in-memory cache)
         filters = await memory2.get_common_filters(
-            query_type=QueryType.VENDOR_LIST,
+            query_type=QueryType.LIST,
             entity_type=EntityType.VENDOR,
             min_occurrences=2
         )
@@ -290,7 +290,7 @@ class TestPatternLearningIntegration:
         # Setup mocks
         mock_classifier = Mock()
         critical_intent = QueryIntent(
-            query_type=QueryType.VENDOR_LIST,
+            query_type=QueryType.LIST,
             entities=[EntityType.VENDOR],
             filters=[
                 FilterCondition(
@@ -373,7 +373,7 @@ class TestPatternLearningIntegration:
         
         for field, value, count in patterns:
             intent = QueryIntent(
-                query_type=QueryType.VENDOR_LIST,
+                query_type=QueryType.LIST,
                 entities=[EntityType.VENDOR],
                 filters=[
                     FilterCondition(
@@ -400,7 +400,7 @@ class TestPatternLearningIntegration:
         
         # Get suggestions for a new query
         new_intent = QueryIntent(
-            query_type=QueryType.VENDOR_LIST,
+            query_type=QueryType.LIST,
             entities=[EntityType.VENDOR],
             filters=[],
         )
@@ -428,7 +428,7 @@ class TestPatternLearningIntegration:
         
         # Create intent
         intent = QueryIntent(
-            query_type=QueryType.VENDOR_LIST,
+            query_type=QueryType.LIST,
             entities=[EntityType.VENDOR],
             filters=[
                 FilterCondition(
@@ -459,7 +459,7 @@ class TestPatternLearningIntegration:
         assert stats["queries_recorded"] == 1
         
         # Pattern should still be tracked
-        filters = await tracker.get_preferred_filters(QueryType.VENDOR_LIST, min_frequency=1)
+        filters = await tracker.get_preferred_filters(QueryType.LIST, min_frequency=1)
         assert "criticality" in filters
 
 
@@ -495,7 +495,7 @@ class TestPatternLearningPerformance:
         # Setup mocks
         mock_classifier = Mock()
         intent = QueryIntent(
-            query_type=QueryType.VENDOR_LIST,
+            query_type=QueryType.LIST,
             entities=[EntityType.VENDOR],
             filters=[],
         )

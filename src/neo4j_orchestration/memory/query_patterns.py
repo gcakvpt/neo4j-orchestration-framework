@@ -23,10 +23,14 @@ class QueryPatternMemory(BaseMemory):
     - Common filter detection
     - Pattern similarity matching
     
+    IMPORTANT: Stores patterns by GENERIC operation type (LIST, FILTER, etc.)
+    not legacy domain-specific types. This enables cross-entity pattern learning.
+    
     Graph Schema:
         (:QueryPattern {
             pattern_id: str,
-            query_type: str,
+            query_type: str,           # Generic type (list, filter, etc.)
+            legacy_type: str,           # Original type if provided
             entities: List[str],
             common_filters: dict,
             frequency: int,
@@ -57,8 +61,11 @@ class QueryPatternMemory(BaseMemory):
         """
         Record a query pattern or update existing one.
         
+        Stores patterns by GENERIC operation type to enable cross-entity learning.
+        Legacy types are converted to generic equivalents automatically.
+        
         Args:
-            query_type: Type of query (VENDOR_LIST, RISK_ASSESSMENT, etc.)
+            query_type: Type of query (can be legacy or generic)
             entities: Entity types involved
             filters: Filter conditions used
             success: Whether query was successful
@@ -72,14 +79,19 @@ class QueryPatternMemory(BaseMemory):
         filters = filters or {}
         entity_names = [e.value for e in entities]
         
-        # Generate pattern signature for matching
-        pattern_sig = f"{query_type.value}::{','.join(sorted(entity_names))}"
+        # Convert to generic type for pattern learning
+        generic_type = query_type.to_generic()
+        legacy_type = query_type.value if query_type.is_legacy else None
+        
+        # Generate pattern signature using GENERIC type for cross-entity learning
+        pattern_sig = f"{generic_type.value}::{','.join(sorted(entity_names))}"
         
         query = """
         MERGE (p:QueryPattern {pattern_signature: $pattern_sig})
         ON CREATE SET
             p.pattern_id = randomUUID(),
             p.query_type = $query_type,
+            p.legacy_type = $legacy_type,
             p.entities = $entities,
             p.common_filters = $filters,
             p.frequency = 1,
@@ -106,7 +118,8 @@ class QueryPatternMemory(BaseMemory):
                 result = session.run(
                     query,
                     pattern_sig=pattern_sig,
-                    query_type=query_type.value,
+                    query_type=generic_type.value,
+                    legacy_type=legacy_type,
                     entities=entity_names,
                     filters=filters,
                     success=success
@@ -196,13 +209,18 @@ class QueryPatternMemory(BaseMemory):
         """
         Get common filters for a query type.
         
+        Looks up patterns by GENERIC type to enable cross-entity learning.
+        
         Args:
-            query_type: Type of query
+            query_type: Type of query (legacy or generic)
             min_frequency: Minimum frequency threshold
             
         Returns:
             Dictionary of common filters
         """
+        # Convert to generic type for lookup
+        generic_type = query_type.to_generic()
+        
         query = """
         MATCH (p:QueryPattern)
         WHERE p.query_type = $query_type
@@ -217,7 +235,7 @@ class QueryPatternMemory(BaseMemory):
             with self.driver.session() as session:
                 result = session.run(
                     query,
-                    query_type=query_type.value,
+                    query_type=generic_type.value,
                     min_frequency=min_frequency
                 )
                 record = result.single()
