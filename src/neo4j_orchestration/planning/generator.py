@@ -78,8 +78,24 @@ class CypherQueryGenerator:
         return query, parameters
     
     def _build_query_templates(self) -> Dict[QueryType, str]:
-        """Build Cypher query templates for each query type."""
+        """
+        Build Cypher query templates for each query type.
+        
+        Generic templates work with any entity type through compositional
+        clause building. Legacy templates maintained for backward compatibility.
+        """
         return {
+            # Generic operation templates (work with any entity)
+            QueryType.LIST: "list",
+            QueryType.FILTER: "filter",
+            QueryType.DETAILS: "details",
+            QueryType.RELATIONSHIP: "relationship",
+            QueryType.AGGREGATE: "aggregate",
+            QueryType.COMPARE: "compare",
+            QueryType.ANALYZE: "analyze",
+            QueryType.UNKNOWN: "unknown",
+            
+            # Legacy domain-specific templates (backward compatibility)
             QueryType.VENDOR_RISK: "vendor_risk",
             QueryType.VENDOR_LIST: "vendor_list",
             QueryType.VENDOR_DETAILS: "vendor_details",

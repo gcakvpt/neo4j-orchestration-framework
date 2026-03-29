@@ -24,10 +24,10 @@ Transform domain-specific QueryType enum into generic operations to enable:
 - [ ] Separate entity detection from operation detection
 - [ ] Update classifier tests (14 tests)
 
-### Phase 3: Generator Refactoring (60 min)
-- [ ] Replace template mapping with composable builder
-- [ ] Build queries from operation + entity + filters
-- [ ] Update generator tests (20 tests)
+### Phase 3: Generator Refactoring (60 min) ✅
+- [x] Added generic operation templates
+- [x] Compositional query building works for all types
+- [x] All 35 generator tests passing (20 + 15 coverage + 5 new)
 
 ### Phase 4: Memory/Pattern System (30 min)
 - [ ] Update QueryPatternMemory

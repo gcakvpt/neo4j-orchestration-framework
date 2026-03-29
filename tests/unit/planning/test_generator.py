@@ -314,3 +314,78 @@ class TestCypherQueryGenerator:
         
         assert "MATCH (v:Vendor)" in query
         assert "RETURN v" in query
+
+
+class TestGenericOperationGeneration:
+    """Tests for generic operation query generation."""
+    
+    @pytest.fixture
+    def generator(self):
+        return CypherQueryGenerator()
+    
+    def test_generic_list_query(self, generator):
+        """Test generating query for generic LIST operation."""
+        intent = QueryIntent(
+            query_type=QueryType.LIST,
+            entities=[EntityType.ASSESSMENT]
+        )
+        
+        query, params = generator.generate(intent)
+        
+        assert "MATCH" in query and "Assessment" in query
+        assert "RETURN" in query
+    
+    def test_generic_filter_query(self, generator):
+        """Test generating query for generic FILTER operation."""
+        intent = QueryIntent(
+            query_type=QueryType.FILTER,
+            entities=[EntityType.RISK],
+            filters=[
+                FilterCondition("severity", FilterOperator.EQUALS, "high")
+            ]
+        )
+        
+        query, params = generator.generate(intent)
+        
+        assert "MATCH" in query and "Risk" in query
+        assert "WHERE" in query
+        assert "RETURN" in query
+    
+    def test_generic_details_query(self, generator):
+        """Test generating query for generic DETAILS operation."""
+        intent = QueryIntent(
+            query_type=QueryType.DETAILS,
+            entities=[EntityType.BUSINESS_UNIT]
+        )
+        
+        query, params = generator.generate(intent)
+        
+        assert "MATCH" in query and "BusinessUnit" in query
+        assert "RETURN" in query
+    
+    def test_generic_aggregate_query(self, generator):
+        """Test generating query for generic AGGREGATE operation."""
+        intent = QueryIntent(
+            query_type=QueryType.AGGREGATE,
+            entities=[EntityType.CONTROL],
+            aggregations=[
+                Aggregation(AggregationType.COUNT, alias="control_count")
+            ]
+        )
+        
+        query, params = generator.generate(intent)
+        
+        assert "MATCH" in query and "Control" in query
+        assert "count" in query or "COUNT" in query
+    
+    def test_generic_with_multiple_entities(self, generator):
+        """Test generic operations work with multiple entities."""
+        intent = QueryIntent(
+            query_type=QueryType.LIST,
+            entities=[EntityType.VENDOR, EntityType.CONTROL]
+        )
+        
+        query, params = generator.generate(intent)
+        
+        # Should handle first entity
+        assert ("Vendor" in query or "Control" in query) and "MATCH" in query
