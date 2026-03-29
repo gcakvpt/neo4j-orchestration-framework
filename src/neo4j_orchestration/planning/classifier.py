@@ -236,72 +236,128 @@ class QueryIntentClassifier:
         return any(keyword in query for keyword in relationship_keywords)
     
     def _build_query_patterns(self) -> Dict[QueryType, List[Tuple[str, float]]]:
-        """Build regex patterns for each query type."""
+        """
+        Build regex patterns for each query type.
+        
+        Generic patterns (highest priority):
+        - Match operation + entity combinations
+        - Work with any entity type in the knowledge graph
+        
+        Legacy patterns (backward compatibility):
+        - Domain-specific patterns for existing queries
+        - Maintained for existing code and tests
+        """
         return {
+            # ========== GENERIC OPERATION PATTERNS (New Architecture) ==========
+            
+            QueryType.LIST: [
+                (r'\b(list|show|display|get|find)\s+(all\s+)?\w+s?\b', 0.80),
+                (r'\ball\s+\w+s?\b', 0.75),
+                (r'\b(count|how many)\s+\w+s?\b', 0.85),
+            ],
+            
+            QueryType.FILTER: [
+                (r'\b(find|show|get)\s+\w+s?\s+(with|having|where)\b', 0.85),
+                (r'\b\w+s?\s+(with|having|where)\s+\w+', 0.80),
+                (r'\b(active|inactive|pending|compliant|non-compliant)\s+\w+s?\b', 0.85),
+            ],
+            
+            QueryType.DETAILS: [
+                (r'\b(details?|information|info)\s+(about|for|on)\s+\w+', 0.90),
+                (r'\b\w+\s+(details?|profile|information)\b', 0.85),
+            ],
+            
+            QueryType.RELATIONSHIP: [
+                (r'\b(relationship|connection|link)s?\s+(between|of|for)\b', 0.90),
+                (r'\b\w+\s+(relationship|connection|link)s?\b', 0.85),
+                (r'\b(connect|link|relate)\w*\s+\w+', 0.80),
+            ],
+            
+            QueryType.AGGREGATE: [
+                (r'\b(total|sum|average|avg|count|max|min)\s+\w+', 0.90),
+                (r'\bgroup\s+\w+\s+by\b', 0.90),
+                (r'\b\w+\s+(by\s+)?\w+\s+(group|category|type)\b', 0.80),
+            ],
+            
+            QueryType.COMPARE: [
+                (r'\bcompare\s+\w+', 0.95),
+                (r'\b(difference|comparison)\s+between\b', 0.90),
+                (r'\b\w+\s+vs\.?\s+\w+\b', 0.85),
+            ],
+            
+            QueryType.ANALYZE: [
+                (r'\banalyz[e|ing]\s+\w+', 0.90),
+                (r'\b\w+\s+analysis\b', 0.85),
+                (r'\b(assess|evaluate)\w*\s+\w+', 0.85),
+                (r'\b(impact|blast\s+radius|effectiveness)\b', 0.80),
+            ],
+            
+            # ========== LEGACY DOMAIN-SPECIFIC PATTERNS (Backward Compatibility) ==========
+            
             QueryType.VENDOR_RISK: [
                 (r'\b(vendor|supplier)s?\s+(with|having)\s+(critical|high|medium|low)?\s*risk', 0.95),
                 (r'\b(which|what)\s+(vendor|supplier)s?\s+(have|with)\s+(high|critical|medium|low)\s+\w+\s+risk', 0.95),
                 (r'\btop\s+\d+\s+(vendor|supplier)s?', 0.95),
-                (r'\b(vendor|supplier)s?\s+(by|with)\s+risk\s+(level|rating)', 0.9),
+                (r'\b(vendor|supplier)s?\s+(by|with)\s+risk\s+(level|rating)', 0.92),
                 (r'\btop\s+\d+\s+(vendor|supplier)s?\s+(by\s+)?risk', 0.95),
-                (r'\brisk\w*\s+(vendor|supplier)', 0.9),
-                (r'\b(vendor|supplier)\s+risk', 0.9),
+                (r'\brisk\w*\s+(vendor|supplier)', 0.92),
+                (r'\b(vendor|supplier)\s+risk', 0.92),
             ],
             QueryType.VENDOR_LIST: [
-                (r'\b(count|how many)\s+(all\s+)?(vendor|supplier)s?', 0.9),
-                (r'\b(list|show|display|get)\s+(active|inactive|pending)\s+(vendor|supplier)s?', 0.9),
-                (r'\b(all|show)\s+(vendor|supplier)s?', 0.85),
-                (r'\b(list|show|display|get)\s+(all\s+)?(vendor|supplier)s?', 0.9),
-                (r'\b(vendor|supplier)s?\s+(list|directory)', 0.85),
+                (r'\b(count|how many)\s+(all\s+)?(vendor|supplier)s?', 0.92),
+                (r'\b(list|show|display|get)\s+(active|inactive|pending)\s+(vendor|supplier)s?', 0.92),
+                (r'\b(all|show)\s+(vendor|supplier)s?', 0.87),
+                (r'\b(list|show|display|get)\s+(all\s+)?(vendor|supplier)s?', 0.92),
+                (r'\b(vendor|supplier)s?\s+(list|directory)', 0.87),
             ],
             QueryType.VENDOR_DETAILS: [
                 (r'\b(details?|information|info)\s+(about|for|on)\s+(vendor|supplier)', 0.95),
-                (r'\b(vendor|supplier)\s+(details?|profile)', 0.9),
+                (r'\b(vendor|supplier)\s+(details?|profile)', 0.92),
             ],
             QueryType.VENDOR_CONTROLS: [
                 (r'\b(vendor|supplier)\s+control', 0.95),
-                (r'\bcontrol\w*\s+(for|of)\s+(vendor|supplier)', 0.9),
+                (r'\bcontrol\w*\s+(for|of)\s+(vendor|supplier)', 0.92),
             ],
             QueryType.VENDOR_CONCENTRATION: [
                 (r'\b(vendor|supplier)\s+concentration', 0.95),
-                (r'\bconcentration\s+(risk|analysis)', 0.9),
+                (r'\bconcentration\s+(risk|analysis)', 0.92),
             ],
             QueryType.COMPLIANCE_STATUS: [
                 (r'\bcompliance\s+status', 0.95),
-                (r'\b(compliant|non-compliant)', 0.85),
+                (r'\b(compliant|non-compliant)', 0.87),
             ],
             QueryType.REGULATION_DETAILS: [
                 (r'\bregulation\s+(details?|information)', 0.95),
-                (r'\b(what|which)\s+regulations?\s+(apply|relate)', 0.9),
-                (r'\bregulations?\s+(for|applying to|about)', 0.85),
-                (r'\b(bsa|aml|fcra|ecoa)\s+(requirement|rule)', 0.9),
+                (r'\b(what|which)\s+regulations?\s+(apply|relate)', 0.92),
+                (r'\bregulations?\s+(for|applying to|about)', 0.87),
+                (r'\b(bsa|aml|fcra|ecoa)\s+(requirement|rule)', 0.92),
             ],
             QueryType.COMPLIANCE_GAPS: [
                 (r'\bcompliance\s+gap', 0.95),
-                (r'\b(gap|deficienc)', 0.85),
+                (r'\b(gap|deficienc)', 0.87),
             ],
             QueryType.CONTROL_EFFECTIVENESS: [
                 (r'\bcontrol\s+effectiveness', 0.95),
-                (r'\beffective\s+control', 0.85),
+                (r'\beffective\s+control', 0.87),
             ],
             QueryType.CONTROL_COVERAGE: [
                 (r'\bcontrol\s+coverage', 0.95),
-                (r'\bcoverage\s+analysis', 0.85),
+                (r'\bcoverage\s+analysis', 0.87),
             ],
             QueryType.CONTROL_BLAST_RADIUS: [
                 (r'\bblast\s+radius', 0.95),
-                (r'\bimpact\s+analysis', 0.8),
+                (r'\bimpact\s+analysis', 0.82),
             ],
             QueryType.RISK_ASSESSMENT: [
                 (r'\brisk\s+assessment', 0.95),
-                (r'\bassess\w*\s+risk', 0.85),
+                (r'\bassess\w*\s+risk', 0.87),
             ],
             QueryType.ISSUE_TRACKING: [
-                (r'\b(issue|finding|exception)', 0.9),
-                (r'\b(track|monitor)\s+(issue|finding)', 0.85),
+                (r'\b(issue|finding|exception)', 0.92),
+                (r'\b(track|monitor)\s+(issue|finding)', 0.87),
             ],
         }
-    
+
     def _build_entity_keywords(self) -> Dict[EntityType, List[str]]:
         """Build keyword mappings for entity types."""
         return {

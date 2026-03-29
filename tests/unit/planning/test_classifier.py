@@ -375,3 +375,87 @@ class TestQueryIntentClassifier:
         )
         assert risk_filter is not None
         assert risk_filter.value == "Low"
+
+
+class TestGenericOperationPatterns:
+    """Tests for generic operation pattern matching."""
+    
+    @pytest.fixture
+    def classifier(self):
+        return QueryIntentClassifier()
+    
+    def test_generic_list_pattern(self, classifier):
+        """Test generic LIST pattern works with any entity (non-legacy)."""
+        queries = [
+            "list all assessments",  # No legacy pattern for assessments
+            "show all business units",
+            "get all technologies"
+        ]
+        
+        for query in queries:
+            intent = classifier.classify(query)
+            # Should match generic LIST pattern
+            assert intent.query_type == QueryType.LIST
+    
+    def test_generic_filter_pattern(self, classifier):
+        """Test generic FILTER pattern."""
+        queries = [
+            "find risks with high severity",
+            "show controls where status is active",
+            "get issues having critical priority"
+        ]
+        
+        for query in queries:
+            intent = classifier.classify(query)
+            assert intent.query_type == QueryType.FILTER or intent.query_type.to_generic() == QueryType.FILTER
+    
+    def test_generic_details_pattern(self, classifier):
+        """Test generic DETAILS pattern with non-legacy entities."""
+        queries = [
+            "details about business unit",
+            "information on technology stack",
+            "assessment profile"
+        ]
+        
+        for query in queries:
+            intent = classifier.classify(query)
+            assert intent.query_type == QueryType.DETAILS
+    
+    def test_generic_aggregate_pattern(self, classifier):
+        """Test generic AGGREGATE pattern."""
+        queries = [
+            "count all risks",
+            "total controls",
+            "average risk score"
+        ]
+        
+        for query in queries:
+            intent = classifier.classify(query)
+            assert intent.query_type == QueryType.AGGREGATE or intent.query_type.to_generic() == QueryType.AGGREGATE
+    
+    def test_generic_analyze_pattern(self, classifier):
+        """Test generic ANALYZE pattern."""
+        query = "analyze vendor dependencies"
+        intent = classifier.classify(query)
+        
+        # Should now match ANALYZE instead of UNKNOWN
+        assert intent.query_type == QueryType.ANALYZE
+        assert EntityType.VENDOR in intent.entities
+    
+    def test_legacy_patterns_still_work(self, classifier):
+        """Test that legacy domain-specific patterns still match."""
+        query = "show me all vendors with critical risk"
+        intent = classifier.classify(query)
+        
+        # Legacy pattern should win with higher confidence
+        assert intent.query_type == QueryType.VENDOR_RISK
+        assert intent.confidence >= 0.9
+    
+    def test_generic_with_arbitrary_entity(self, classifier):
+        """Test generic patterns work with entities not in legacy patterns."""
+        query = "list all assessments"
+        intent = classifier.classify(query)
+        
+        # Should match generic LIST
+        assert intent.query_type == QueryType.LIST
+        assert EntityType.ASSESSMENT in intent.entities
