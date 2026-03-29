@@ -37,7 +37,7 @@ class TestOrchestratorIntegration:
     def mock_intent(self):
         """Create a realistic query intent."""
         return QueryIntent(
-            query_type=QueryType.VENDOR_RISK,
+            query_type=QueryType.ANALYZE,
             entities=[EntityType.VENDOR],
             filters=[],
         )
@@ -195,8 +195,8 @@ class TestOrchestratorIntegration:
         orchestrator = QueryOrchestrator(mock_executor)
         
         # Query different entities
-        vendor_intent = QueryIntent(query_type=QueryType.VENDOR_LIST, entities=[EntityType.VENDOR])
-        control_intent = QueryIntent(query_type=QueryType.CONTROL_EFFECTIVENESS, entities=[EntityType.CONTROL])
+        vendor_intent = QueryIntent(query_type=QueryType.LIST, entities=[EntityType.VENDOR])
+        control_intent = QueryIntent(query_type=QueryType.FILTER, entities=[EntityType.CONTROL])
         
         mock_classifier.classify.return_value = vendor_intent
         orchestrator.query("Show vendors")
