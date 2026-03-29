@@ -19,10 +19,10 @@ Transform domain-specific QueryType enum into generic operations to enable:
 - [x] Update QueryIntent usage
 - [x] Run basic tests (100/103 passing)
 
-### Phase 2: Classifier Refactoring (45 min)
-- [ ] Update keyword mapping
-- [ ] Separate entity detection from operation detection
-- [ ] Update classifier tests (14 tests)
+### Phase 2: Classifier Refactoring (45 min) ✅
+- [x] Added generic operation patterns to classifier
+- [x] 7 generic patterns working with any entity
+- [x] 7 new tests for generic operations (all passing)
 
 ### Phase 3: Generator Refactoring (60 min) ✅
 - [x] Added generic operation templates
