@@ -32,7 +32,7 @@ def mock_context():
 def vendor_intent():
     """Create vendor list intent."""
     return QueryIntent(
-        query_type=QueryType.VENDOR_LIST,
+        query_type=QueryType.LIST,
         entities=[EntityType.VENDOR],
         filters=[],
         aggregations=[],
@@ -144,7 +144,7 @@ class TestContextAwareClassifier:
             mock_loop.return_value.is_running.return_value = False
             mock_loop.return_value.run_until_complete.side_effect = [
                 [EntityType.VENDOR, EntityType.CONTROL],  # get_last_entities
-                QueryType.VENDOR_LIST  # get_last_query_type
+                QueryType.LIST  # get_last_query_type
             ]
             
             enhanced = classifier._enhance_with_context(
@@ -170,7 +170,7 @@ class TestContextAwareClassifier:
             mock_loop.return_value.is_running.return_value = False
             mock_loop.return_value.run_until_complete.side_effect = [
                 [EntityType.CONTROL],  # get_last_entities
-                QueryType.CONTROL_EFFECTIVENESS  # get_last_query_type
+                QueryType.FILTER  # get_last_query_type
             ]
             
             enhanced = classifier._enhance_with_context(
@@ -195,7 +195,7 @@ class TestContextAwareClassifier:
             mock_loop.return_value.is_running.return_value = False
             mock_loop.return_value.run_until_complete.side_effect = [
                 [EntityType.VENDOR],  # get_last_entities
-                QueryType.VENDOR_RISK  # get_last_query_type
+                QueryType.ANALYZE  # get_last_query_type
             ]
             
             enhanced = classifier._enhance_with_context(
@@ -205,7 +205,7 @@ class TestContextAwareClassifier:
             )
         
         # Should inherit query type
-        assert enhanced.query_type == QueryType.VENDOR_RISK
+        assert enhanced.query_type == QueryType.ANALYZE
     
     def test_convenience_function(self, mock_base_classifier, vendor_intent):
         """Test convenience function."""
@@ -235,7 +235,7 @@ class TestContextAwareClassifierIntegration:
             mock_loop.return_value.is_running.return_value = False
             mock_loop.return_value.run_until_complete.side_effect = [
                 [EntityType.VENDOR],  # get_last_entities
-                QueryType.VENDOR_RISK  # get_last_query_type (changed to VENDOR_RISK)
+                QueryType.ANALYZE  # get_last_query_type (changed to VENDOR_RISK)
             ]
             
             # Follow-up query with pronoun
@@ -247,4 +247,4 @@ class TestContextAwareClassifierIntegration:
         # Should have vendor entity (either from base classifier or context)
         # The base classifier detects "critical" and creates VENDOR_RISK with RISK entity
         # Context enhancement should add VENDOR entity
-        assert EntityType.VENDOR in result.entities or result.query_type == QueryType.VENDOR_RISK
+        assert EntityType.VENDOR in result.entities or result.query_type == QueryType.ANALYZE

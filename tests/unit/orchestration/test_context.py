@@ -25,7 +25,7 @@ def mock_working_memory():
 def sample_intent():
     """Create sample QueryIntent."""
     return QueryIntent(
-        query_type=QueryType.VENDOR_LIST,
+        query_type=QueryType.LIST,
         entities=[EntityType.VENDOR],
         filters=[],
         aggregations=[],
@@ -95,7 +95,7 @@ class TestConversationContext:
         history = call_args[1]["value"]
         assert len(history) == 1
         assert history[0]["query"] == "Show all vendors"
-        assert history[0]["intent"]["query_type"] == "VENDOR_LIST"
+        assert history[0]["intent"]["query_type"] == "LIST"
     
     @pytest.mark.asyncio
     async def test_add_query_appends_to_existing_history(
@@ -232,7 +232,7 @@ class TestConversationContext:
         """Test getting last query type."""
         history = [{
             "query": "Show vendors",
-            "intent": {"query_type": "VENDOR_RISK"},
+            "intent": {"query_type": "ANALYZE"},
             "timestamp": datetime.now().isoformat()
         }]
         
@@ -245,7 +245,7 @@ class TestConversationContext:
         context = ConversationContext(mock_working_memory, "session1")
         query_type = await context.get_last_query_type()
         
-        assert query_type == QueryType.VENDOR_RISK
+        assert query_type == QueryType.ANALYZE
     
     @pytest.mark.asyncio
     async def test_get_last_query_type_empty(self, mock_working_memory):
@@ -261,7 +261,7 @@ class TestConversationContext:
         """Test getting last query string."""
         history = [{
             "query": "Show all vendors with critical risks",
-            "intent": {"query_type": "VENDOR_RISK"},
+            "intent": {"query_type": "ANALYZE"},
             "timestamp": datetime.now().isoformat()
         }]
         
@@ -294,7 +294,7 @@ class TestConversationContext:
         
         serialized = context._serialize_intent(sample_intent)
         
-        assert serialized["query_type"] == "VENDOR_LIST"
+        assert serialized["query_type"] == "LIST"
         assert serialized["entities"] == ["VENDOR"]
         assert serialized["confidence"] == 0.9
         assert serialized["has_filters"] is False

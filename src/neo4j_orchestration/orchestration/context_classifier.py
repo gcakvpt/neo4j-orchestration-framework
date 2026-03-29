@@ -25,6 +25,11 @@ class ContextAwareClassifier:
     - Resolves pronouns using entity history
     - Infers entities from previous queries
     - Detects follow-up queries
+    - Converts legacy query types to generic for consistency
+    
+    IMPORTANT: When inheriting query types from context, automatically
+    converts them to generic operations (LIST, FILTER, etc.) to ensure
+    consistent behavior across conversation turns.
     
     Example:
         >>> classifier = ContextAwareClassifier(base_classifier)
@@ -33,12 +38,12 @@ class ContextAwareClassifier:
         ...     "Show all vendors",
         ...     context
         ... )
-        >>> # Follow-up with pronoun
+        >>> # Follow-up with pronoun - inherits entities AND converts to generic type
         >>> intent2 = classifier.classify_with_context(
         ...     "Which ones have critical risks?",
         ...     context
         ... )
-        >>> # intent2 inherits VENDOR entity from intent1
+        >>> # intent2 inherits VENDOR entity and generic query type from intent1
     """
     
     # Pronouns that trigger context resolution
@@ -160,8 +165,10 @@ class ContextAwareClassifier:
         if intent.query_type == QueryType.UNKNOWN and last_query_type:
             # For simple follow-ups, keep same query type
             if self._is_simple_followup(query):
-                logger.info(f"Inferring query type from context: {last_query_type.name}")
-                intent.query_type = last_query_type
+                # Convert to generic type for consistency
+                generic_type = last_query_type.to_generic()
+                logger.info(f"Inferring query type from context: {last_query_type.name} -> {generic_type.name}")
+                intent.query_type = generic_type
         
         return intent
     
