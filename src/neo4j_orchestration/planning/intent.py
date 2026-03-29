@@ -11,36 +11,47 @@ from typing import Dict, List, Optional, Any
 
 
 class QueryType(Enum):
-    """Types of queries supported by the system."""
+    """Generic query operation types for knowledge graph queries."""
     
-    # Vendor queries
+    # Generic operations (new architecture)
+    LIST = "list"
+    FILTER = "filter"
+    DETAILS = "details"
+    RELATIONSHIP = "relationship"
+    AGGREGATE = "aggregate"
+    COMPARE = "compare"
+    ANALYZE = "analyze"
+    UNKNOWN = "unknown"
+    
+    # Legacy domain-specific types (backward compatibility)
     VENDOR_RISK = "vendor_risk"
     VENDOR_LIST = "vendor_list"
     VENDOR_DETAILS = "vendor_details"
     VENDOR_CONTROLS = "vendor_controls"
     VENDOR_CONCENTRATION = "vendor_concentration"
-    
-    # Compliance queries
     COMPLIANCE_STATUS = "compliance_status"
     REGULATION_DETAILS = "regulation_details"
     COMPLIANCE_GAPS = "compliance_gaps"
-    
-    # Control queries
     CONTROL_EFFECTIVENESS = "control_effectiveness"
     CONTROL_COVERAGE = "control_coverage"
     CONTROL_BLAST_RADIUS = "control_blast_radius"
-    
-    # Risk queries
     RISK_ASSESSMENT = "risk_assessment"
     RISK_TRENDS = "risk_trends"
     ISSUE_TRACKING = "issue_tracking"
-    
-    # Relationship queries
     DEPENDENCY_ANALYSIS = "dependency_analysis"
     IMPACT_ANALYSIS = "impact_analysis"
     
-    # General queries
-    UNKNOWN = "unknown"
+    @property
+    def is_generic(self) -> bool:
+        return self in {QueryType.LIST, QueryType.FILTER, QueryType.DETAILS, QueryType.RELATIONSHIP, QueryType.AGGREGATE, QueryType.COMPARE, QueryType.ANALYZE, QueryType.UNKNOWN}
+    
+    @property
+    def is_legacy(self) -> bool:
+        return not self.is_generic
+    
+    def to_generic(self) -> "QueryType":
+        mapping = {QueryType.VENDOR_LIST: QueryType.LIST, QueryType.VENDOR_DETAILS: QueryType.DETAILS, QueryType.VENDOR_CONTROLS: QueryType.RELATIONSHIP, QueryType.VENDOR_CONCENTRATION: QueryType.AGGREGATE, QueryType.VENDOR_RISK: QueryType.ANALYZE, QueryType.COMPLIANCE_STATUS: QueryType.FILTER, QueryType.REGULATION_DETAILS: QueryType.DETAILS, QueryType.COMPLIANCE_GAPS: QueryType.ANALYZE, QueryType.CONTROL_EFFECTIVENESS: QueryType.ANALYZE, QueryType.CONTROL_COVERAGE: QueryType.AGGREGATE, QueryType.CONTROL_BLAST_RADIUS: QueryType.ANALYZE, QueryType.RISK_ASSESSMENT: QueryType.ANALYZE, QueryType.RISK_TRENDS: QueryType.AGGREGATE, QueryType.ISSUE_TRACKING: QueryType.FILTER, QueryType.DEPENDENCY_ANALYSIS: QueryType.RELATIONSHIP, QueryType.IMPACT_ANALYSIS: QueryType.RELATIONSHIP}
+        return mapping.get(self, self)
 
 
 class EntityType(Enum):

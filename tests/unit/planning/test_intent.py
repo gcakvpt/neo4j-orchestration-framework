@@ -301,3 +301,54 @@ class TestQueryIntent:
         
         assert intent.metadata["original_query"] == "Show all vendors"
         assert intent.metadata["user"] == "test"
+
+
+class TestQueryTypeGenericOperations:
+    """Tests for generic QueryType operations."""
+    
+    def test_generic_operations_are_generic(self):
+        """Test that generic operations are identified correctly."""
+        assert QueryType.LIST.is_generic
+        assert QueryType.FILTER.is_generic
+        assert QueryType.DETAILS.is_generic
+        assert QueryType.RELATIONSHIP.is_generic
+        assert QueryType.AGGREGATE.is_generic
+        assert QueryType.COMPARE.is_generic
+        assert QueryType.ANALYZE.is_generic
+        assert QueryType.UNKNOWN.is_generic
+    
+    def test_legacy_operations_are_legacy(self):
+        """Test that legacy operations are identified correctly."""
+        assert QueryType.VENDOR_LIST.is_legacy
+        assert QueryType.VENDOR_RISK.is_legacy
+        assert QueryType.CONTROL_EFFECTIVENESS.is_legacy
+        assert not QueryType.VENDOR_LIST.is_generic
+    
+    def test_legacy_to_generic_conversion(self):
+        """Test converting legacy types to generic operations."""
+        assert QueryType.VENDOR_LIST.to_generic() == QueryType.LIST
+        assert QueryType.VENDOR_DETAILS.to_generic() == QueryType.DETAILS
+        assert QueryType.VENDOR_CONTROLS.to_generic() == QueryType.RELATIONSHIP
+        assert QueryType.VENDOR_CONCENTRATION.to_generic() == QueryType.AGGREGATE
+        assert QueryType.VENDOR_RISK.to_generic() == QueryType.ANALYZE
+        
+        assert QueryType.COMPLIANCE_STATUS.to_generic() == QueryType.FILTER
+        assert QueryType.CONTROL_EFFECTIVENESS.to_generic() == QueryType.ANALYZE
+        assert QueryType.RISK_TRENDS.to_generic() == QueryType.AGGREGATE
+    
+    def test_generic_to_generic_returns_self(self):
+        """Test that generic types return themselves."""
+        assert QueryType.LIST.to_generic() == QueryType.LIST
+        assert QueryType.FILTER.to_generic() == QueryType.FILTER
+        assert QueryType.ANALYZE.to_generic() == QueryType.ANALYZE
+    
+    def test_create_intent_with_generic_type(self):
+        """Test creating QueryIntent with generic operation type."""
+        intent = QueryIntent(
+            query_type=QueryType.LIST,
+            entities=[EntityType.VENDOR]
+        )
+        
+        assert intent.query_type == QueryType.LIST
+        assert intent.query_type.is_generic
+        assert intent.entities == [EntityType.VENDOR]
