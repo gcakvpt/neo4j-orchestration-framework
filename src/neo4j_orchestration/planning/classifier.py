@@ -8,7 +8,7 @@ for routing to appropriate query execution strategies.
 import re
 from typing import Dict, List, Optional, Tuple, Set
 
-from neo4j_orchestration.planning.intent import (
+from .intent import (
     QueryType,
     QueryIntent,
     EntityType,
